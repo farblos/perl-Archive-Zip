@@ -33,7 +33,9 @@ use constant _IN_AUTOTEST_ENVIRONMENT =>
     exists($ENV{'PERL_CPAN_REPORTER_CONFIG'});
 
 use constant TESTDIR => do {
-    -d 'testdir' or mkdir 'testdir' or die $!;
+    # standard (-d ... or mkdir ... or die $!) is prone to race
+    # conditions in parallel tests
+    mkdir 'testdir'; do { local $!; -d 'testdir' } or die $!;
     tempdir(DIR => 'testdir', CLEANUP => 1, EXLOCK => 0);
 };
 
