@@ -35,8 +35,11 @@ sub makeZipAndLookFor {
         or diag("Can't find $lookFor in (" . join(",", @memberNames) . ")");
 }
 
+# do not zip files from below test directories, or otherwise
+# their removal in parallel tests can cause race conditions in
+# method Archive::Zip::addTree
 makeZipAndLookFor('.', '',   sub { note "file $_";
-                                   -f && /\.t$/ },       't/02_main.t');
-makeZipAndLookFor('.', 'e/', sub { -f && /\.t$/ },       'e/t/02_main.t');
-makeZipAndLookFor('t', '',   sub { -f && /\.t$/ },       '02_main.t');
-makeZipAndLookFor('t', 'e/', sub { -f && /\.t$/ || -d }, 'e/data/');
+                                   -f && ! /\btestdir\b/ && /\.t$/ },       't/02_main.t');
+makeZipAndLookFor('.', 'e/', sub { -f && ! /\btestdir\b/ && /\.t$/ },       'e/t/02_main.t');
+makeZipAndLookFor('t', '',   sub { -f && ! /\btestdir\b/ && /\.t$/ },       '02_main.t');
+makeZipAndLookFor('t', 'e/', sub { -f && ! /\btestdir\b/ && /\.t$/ || -d }, 'e/data/');
