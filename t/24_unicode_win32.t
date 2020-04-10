@@ -11,7 +11,7 @@ use utf8;
 BEGIN { $^W = 1; }
 
 use File::Temp;
-use Test::More tests => 48;
+use Test::More;
 
 use Archive::Zip qw();
 
@@ -49,10 +49,22 @@ sub cata
 
 my $euro_filename = "euro-€";
 {
-    mkdir(testPath('folder')) or die;
-    open(my $euro_file, ">", testPath('folder', $euro_filename)) or die;
-    print $euro_file "File EURO\n" or die;
-    close($euro_file) or die;
+    mkdir(testPath('folder')) or die $!;
+    # skip all remaining tests if the current system fails to
+    # open a file with a name containing wide characters.  This
+    # has happened on Windows 10 systems with Korean locale.
+    my $euro_file;
+    if (! open($euro_file, ">", testPath('folder', $euro_filename))) {
+        # convert file name to something containing ASCII
+        # characters only
+        $euro_filename = join("", map($_ <= 127 ? chr($_) : sprintf("\\x{%04X}", $_),
+                                      unpack("W*", testPath('folder', $euro_filename))));
+        plan(skip_all => "File \"$euro_filename\" failed to open (\l$!).");
+    } else {
+        plan(tests => 48);
+    }
+    print $euro_file "File EURO\n" or die $!;
+    close($euro_file) or die $!;
 }
 
 # create member called $euro_filename with addTree
