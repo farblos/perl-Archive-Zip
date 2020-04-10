@@ -202,6 +202,15 @@ elsif (! $uztWorks) {
     $uztOutErr .= "Exit value $uztExitVal\n";
 }
 
+# Unfortunately, test file "t/data/simple.zip" used above results
+# in "false positives" on FreeBSD 9 and 10, which use their own,
+# misbehaving, libarchive-based versions of unzip.  So explicitly
+# declare "unzip -t" to be not working on these systems.
+if ($uztWorks && $^O eq 'freebsd' && $Config{'osvers'} =~ /\A(?:9|10)\./) {
+    $uztWorks = 0;
+    $uztOutErr .= "Misbehaving unzip on FreeBSD 9 and 10\n";
+}
+
 # Check whether we can write through a (non-seekable) pipe
 my $pipeCommand = '| "' . $Config{'perlpath'} . '" -pe "BEGIN{binmode(STDIN);binmode(STDOUT)}" >';
 my $pipeError = "";
