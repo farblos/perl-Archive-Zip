@@ -167,7 +167,7 @@ ok  (-f $memberName);
 is  (readFile($memberName), TESTSTRING);
 
 #--------- add a file member, compressed
-ok(rename($memberName, testPath('file.txt', PATH_ZIPFILE)));
+ok(rename($memberName, testPath('file.txt')));
 $memberName = testPath('file.txt', PATH_ZIPFILE);
 
 # addFile	# Archive::Zip::Archive
